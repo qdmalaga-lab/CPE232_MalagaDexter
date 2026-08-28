@@ -1,0 +1,5 @@
+config.yaml
+*.retry
+.vault_pass
+*.pem
+*.key

@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:{{ prometheus_port }}"]
+
+  - job_name: "node_exporters"
+    static_configs:
+      - targets:
+{% for target in prometheus_scrape_targets %}
+          - "{{ target }}"
+{% endfor %}

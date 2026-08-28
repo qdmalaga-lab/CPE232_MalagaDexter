@@ -1,0 +1,20 @@
+---
+# playbooks/lamp_stack.yml
+# Installs Apache+PHP and MariaDB, each on their own separate host
+# per the exam requirement.
+
+- name: Install and configure Apache + PHP
+  hosts: web
+  become: true
+  vars_files:
+    - ../config.yaml
+  roles:
+    - apache_php
+
+- name: Install and configure MariaDB
+  hosts: db
+  become: true
+  vars_files:
+    - ../config.yaml
+  roles:
+    - mariadb

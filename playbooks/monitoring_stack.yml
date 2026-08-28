@@ -1,0 +1,28 @@
+---
+# playbooks/monitoring_stack.yml
+# Installs InfluxDB, Prometheus, and Grafana, each on their own
+# separate host per the exam requirement.
+
+- name: Install and configure InfluxDB
+  hosts: influxdb
+  become: true
+  vars_files:
+    - ../config.yaml
+  roles:
+    - influxdb
+
+- name: Install and configure Prometheus
+  hosts: prometheus
+  become: true
+  vars_files:
+    - ../config.yaml
+  roles:
+    - prometheus
+
+- name: Install and configure Grafana
+  hosts: grafana
+  become: true
+  vars_files:
+    - ../config.yaml
+  roles:
+    - grafana

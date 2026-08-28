@@ -1,0 +1,71 @@
+---
+# roles/kibana/tasks/main.yml
+- name: Disable unattended-upgrades to avoid apt lock conflicts
+  ansible.builtin.systemd:
+    name: unattended-upgrades
+    enabled: false
+    state: stopped
+  ignore_errors: true
+
+- name: Install prerequisite packages
+  apt:
+    name:
+      - apt-transport-https
+      - gnupg2
+      - curl
+    state: present
+    update_cache: true
+
+- name: Ensure /etc/apt/keyrings exists
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Download and store the Elastic GPG key
+  shell: curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor -o /etc/apt/keyrings/elastic.gpg
+  args:
+    creates: /etc/apt/keyrings/elastic.gpg
+
+- name: Add Elastic APT repository
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/elastic.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main"
+    state: present
+    filename: elastic-8.x
+
+- name: Install Kibana
+  apt:
+    name: kibana
+    state: present
+    update_cache: true
+
+- name: Point Kibana at the Elasticsearch host
+  lineinfile:
+    path: /etc/kibana/kibana.yml
+    regexp: '^elasticsearch.hosts:'
+    line: "elasticsearch.hosts: [\"http://{{ hostvars['es-host']['ansible_host'] }}:{{ elasticsearch_port }}\"]"
+    create: true
+
+- name: Allow Kibana to listen on all interfaces
+  lineinfile:
+    path: /etc/kibana/kibana.yml
+    regexp: '^server.host:'
+    line: 'server.host: "0.0.0.0"'
+
+- name: Set Kibana port
+  lineinfile:
+    path: /etc/kibana/kibana.yml
+    regexp: '^server.port:'
+    line: "server.port: {{ kibana_port }}"
+
+- name: Enable and start Kibana service
+  systemd:
+    name: kibana
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Wait for Kibana to respond on its port
+  wait_for:
+    port: "{{ kibana_port }}"
+    timeout: 180

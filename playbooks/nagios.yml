@@ -1,0 +1,11 @@
+---
+# playbooks/nagios.yml
+# Installs and configures Nagios Core on a single host.
+
+- name: Install and configure Nagios
+  hosts: nagios
+  become: true
+  vars_files:
+    - ../config.yaml
+  roles:
+    - nagios

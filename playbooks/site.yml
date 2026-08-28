@@ -1,0 +1,9 @@
+---
+# playbooks/site.yml
+# Master playbook - runs the entire workflow end to end.
+# Usage: ansible-playbook -i inventory/hosts.ini playbooks/site.yml -e "@config.yaml"
+
+- import_playbook: elastic_stack.yml
+- import_playbook: nagios.yml
+- import_playbook: monitoring_stack.yml
+- import_playbook: lamp_stack.yml
